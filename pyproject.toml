@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyscript_3dapp_lib"
+version = "0.0.1"
+authors = [
+  { name="chenkianwee", email="chenkianwee@gmail.com" },
+]
+description = 'util function for developing 3D app in pyscript with threejs'
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+               "Programming Language :: Python :: 3.12",
+               "Operating System :: OS Independent"]
+
+[project.urls]
+"Homepage" = "https://github.com/chenkianwee/pyscript_3dapp_lib"
+"Bug Tracker" = "https://github.com/chenkianwee/pyscript_3dapp_lib/issues"
