@@ -1,10 +1,12 @@
-name: CD
+name: release with python wheel
 
 on:
-  workflow_dispatch:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   dist:
@@ -24,3 +26,17 @@ jobs:
 
       - name: Check metadata
         run: pipx run twine check dist/*
+  
+  release:
+    name: Release pushed tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${tag#v}" \
+              --generate-notes
