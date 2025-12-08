@@ -9,7 +9,7 @@ from js import Uint8Array, File, URL
 
 def convertxyz2zxy(xyzs: np.ndarray):
     """
-    convert xyzs from xyz cs to zxy coordinate
+    convert xyzs from xyz cs to zxy coordinates
 
     Parameters
     ----------
