@@ -7,7 +7,7 @@ from plyfile import PlyData, PlyElement
 from pyscript import document
 from js import Uint8Array, File, URL
 
-def convertxyz2zxy(xyzs: np.ndarray):
+def convertxyz2zxy(xyzs: np.ndarray) -> np.ndarray:
     """
     convert xyzs from xyz cs to zxy coordinates
 
@@ -34,7 +34,7 @@ def read_stl_web(stl_bytes: bytes) -> dict:
     Parameters
     ----------
     stl_bytes: bytes
-        JS bytes from the file specified  
+        JS bytes from the file specified. Need to be converted to python with .to_py() function.
 
     Returns
     -------
@@ -55,7 +55,7 @@ def read_ply_web(ply_bytes: bytes) -> dict:
     Parameters
     ----------
     ply_bytes: bytes
-        JS bytes from the file specified  
+        JS bytes from the file specified. Need to be converted to python with .to_py() function.
 
     Returns
     -------
@@ -71,6 +71,22 @@ def read_ply_web(ply_bytes: bytes) -> dict:
     return data
 
 def write_ply_web(vertex_data: list[tuple], dtype_val: list[tuple]) -> io.BytesIO:
+    """
+    write ply file for webapp
+
+    Parameters
+    ----------
+    vertex_data: list[tuple]
+        list[shape(npts, 3)]
+
+    dtype_val: list[tuple]
+        example of dtype_val = [('x', 'f4'), ('y', 'f4'), ('z', 'f4'), ('temperature', 'f4')]
+
+    Returns
+    -------
+    io.BytesIO
+        bufferstream to be written to file in the create_hidden_link function 
+    """
     ply_vertex_data = np.array(vertex_data, dtype=dtype_val)
     element = PlyElement.describe(ply_vertex_data, 'vertex')
     ply = PlyData([element], text=True)
@@ -81,6 +97,21 @@ def write_ply_web(vertex_data: list[tuple], dtype_val: list[tuple]) -> io.BytesI
     return buffer
         
 def create_hidden_link(bstream: io.BytesIO, file_name: str, file_type: str):
+    """
+    download file from the webapp
+
+    Parameters
+    ----------
+    bstream: io.BytesIO
+        the data to write to file
+
+    file_name: str
+        the name of the file to write to and download
+
+    file_type: str
+        the extension of the file.
+
+    """
     buffer = bstream.getbuffer()
     nbuffer = len(buffer)
     js_array = Uint8Array.new(nbuffer)
@@ -94,7 +125,43 @@ def create_hidden_link(bstream: io.BytesIO, file_name: str, file_type: str):
     hidden_link.setAttribute("href", url)
     hidden_link.click()
 
-def rgb_falsecolors(vals, minval, mxval):
+async def get_bytes_from_file(item) -> bytes:
+    """
+    read the file item specified by the user.
+
+    Parameters
+    ----------
+    item: list[tuple]
+        list[shape(npts, 3)]
+
+    Returns
+    -------
+    bytes
+        bufferstream to be written to file in the create_hidden_link function 
+    """
+    array_buf = await item.arrayBuffer()
+    return array_buf.to_bytes()
+
+def rgb_falsecolors(vals: list[float], minval: float, mxval: float) -> list:
+    """
+    generate falsecolor values corresponding to the parameters.
+
+    Parameters
+    ----------
+    vals: list[float]
+        list[shape(n)], values to be converted to rgb of falsecolor.
+    
+    minval: float
+        min val on the falsecolor bar.
+        
+    mxval: float
+        max val on the falsecolor bar.
+
+    Returns
+    -------
+    list
+        list[shape(nvals*3)] list of flat rgb colors. 
+    """
     rgbs = geomie3d.utility.calc_falsecolour(vals, minval, mxval)
     rgbs_flat = np.array(rgbs).flatten().tolist()
     return rgbs_flat

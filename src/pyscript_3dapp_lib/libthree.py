@@ -4,6 +4,14 @@ from pyscript.js_modules import three as THREE
 from pyscript.js_modules.oc import OrbitControls
 
 def get_renderer():
+    """
+    create threejs webgl renderer
+
+    Returns
+    -------
+    THREE.WebGLRenderer
+        renderer
+    """
     renderer = THREE.WebGLRenderer.new(antialias=True)
     renderer.shadowMap.enabled = False
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -11,6 +19,14 @@ def get_renderer():
     return renderer
 
 def get_scene():
+    """
+    create threejs scene
+
+    Returns
+    -------
+    THREE.Scene
+        scene
+    """
     scene = THREE.Scene.new()
     axes = THREE.AxesHelper.new(5)
     grid = THREE.GridHelper.new(10,10)
@@ -19,6 +35,14 @@ def get_scene():
     return scene 
 
 def get_camera():
+    """
+    create threejs camera
+
+    Returns
+    -------
+    THREE.PerspectiveCamera
+        PerspectiveCamera
+    """
     camera = THREE.PerspectiveCamera.new(
         45,
         window.innerWidth / window.innerHeight,
@@ -28,6 +52,17 @@ def get_camera():
     return camera
 
 def get_lights():
+    """
+    create threejs PointLightcamera
+
+    Returns
+    -------
+    light_back_green : THREE.PointLight
+        back point light
+    
+    light_back_white : THREE.PointLight
+        back point light
+    """
     light_back_green = THREE.PointLight.new(0x00FF00, 1, 1000)
     light_back_green.decay = 3.0
     light_back_green.position.set(5, 0, 2)
@@ -38,6 +73,17 @@ def get_lights():
     return light_back_green, light_back_white
 
 def get_orbit_ctrl(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) -> OrbitControls:
+    """
+    create threejs orbitcontrols
+
+    Returns
+    -------
+    camera: THREE.PerspectiveCamera
+        threejs camera
+    
+    renderer: THREE.WebGLRenderer
+        back point light
+    """
     controls = OrbitControls.new(camera, renderer.domElement)
     controls.enableDamping = True
     controls.dampingFactor = 0.04
@@ -155,10 +201,49 @@ def create_tri_mesh(positions: list, rgb_color: list = [0.8, 0.8, 0.8]) -> THREE
     return mesh, geom_outline
 
 def create_grp():
+    """
+    create threejs group
+
+    Returns
+    -------
+    THREE.Group
+        threejs group
+    """
     grp = THREE.Group.new()
     return grp
 
 def create_cube(sx: float = 1, sy: float = 1, sz: float = 1, r: float = 0.5, g: float = 0.5, b: float = 0.5):
+    """
+    create threejs cube
+
+    Parameters
+    ----------
+    sx: float, optional
+        x size of cube, default = 1. 
+
+    sy: float, optional
+        y size of cube, default = 1.
+
+    sz: float, optional
+        z size of cube, default = 1.
+
+    r: float, optional
+        r of rgb, default = 0.5. 
+
+    g: float, optional
+        g of rgb, default = 0.5.
+
+    b: float, optional
+        b of rgb, default = 0.5.
+
+    Returns
+    -------
+    THREE.Mesh
+        threejs mesh of the cube
+
+    THREE.LineSegments
+        threejs line segments of the cube
+    """
     geometry = THREE.BoxGeometry.new(sx, sy, sz)
     material = THREE.MeshBasicMaterial.new(color = THREE.Color.new(r, g, b))
     cube = THREE.Mesh.new(geometry, material)
@@ -169,7 +254,35 @@ def create_cube(sx: float = 1, sy: float = 1, sz: float = 1, r: float = 0.5, g: 
     
     return cube, cube_edges
 
-def create_sphere(radius: float, width_segs: int, height_segs: int, r: float = 0.5, g: float = 0.5, b: float = 0.5):
+def create_sphere(radius: float, width_segs: int, height_segs: int, r: float = 0.5, g: float = 0.5, b: float = 0.5) -> THREE.Mesh:
+    """
+    create threejs cube
+
+    Parameters
+    ----------
+    radius: float
+        radius of sphere. 
+
+    width_segs: int
+        segments for the width of the sphere
+
+    height_segs: int
+        segments for the height of the sphere
+
+    r: float, optional
+        r of rgb, default = 0.5. 
+
+    g: float, optional
+        g of rgb, default = 0.5.
+
+    b: float, optional
+        b of rgb, default = 0.5.
+
+    Returns
+    -------
+    THREE.Mesh
+        threejs mesh of the sphere
+    """
     geometry = THREE.SphereGeometry.new(radius, width_segs, height_segs)
     material = THREE.MeshBasicMaterial.new(color = THREE.Color.new(r, g, b))
     sphere = THREE.Mesh.new( geometry, material)
