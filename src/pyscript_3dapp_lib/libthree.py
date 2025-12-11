@@ -2,6 +2,7 @@ from pyscript import window
 
 from pyscript.js_modules import three as THREE
 from pyscript.js_modules.oc import OrbitControls
+from pyscript.js_modules.bg import mergeGeometries
 
 def get_renderer():
     """
@@ -117,16 +118,16 @@ def viz_pts(positions: list, size: float = 0.03, rgb_color: list = [1,1,1]) -> T
     points = THREE.Points.new(geometry, material)
     return points
 
-def viz_pts_color(positions: list, colors: list, size: float = 0.03) -> THREE.Points:
+def viz_pts_color(positions: list[float], colors: list[float], size: float = 0.03) -> THREE.Points:
     """
     create threejs point clouds for visualization
 
     Parameters
     ----------
-    positions : list
+    positions : list[float]
         a flat list defined as [x1, y1, z1, x2, y2, z2, ... , xn, yn, zn]
     
-    colors : list
+    colors : list[float]
         a flat list defined as [r1, g1, b1, r2, g2, b2, ... , rn, gn, bn]
 
     size : float, optional
@@ -287,3 +288,65 @@ def create_sphere(radius: float, width_segs: int, height_segs: int, r: float = 0
     material = THREE.MeshBasicMaterial.new(color = THREE.Color.new(r, g, b))
     sphere = THREE.Mesh.new( geometry, material)
     return sphere
+
+def create_lines(positions: list, rgb_color: list = [1,1,1]) -> THREE.LineSegments:
+    """
+    create threejs lines segment
+
+    Parameters
+    ----------
+    positions : list
+        a flat list defined as [x1, y1, z1, x2, y2, z2, ... , xn, yn, zn]
+
+    rgb_color : list, optional
+        list[shape(3)] rgb color in a list.
+
+    Returns
+    -------
+    THREE.LineSegments
+        threejs lines that can be visualize
+    """
+    positions = window.Float32Array.new(positions)
+    geometry = THREE.BufferGeometry.new()
+    geometry.setAttribute( "position", THREE.Float32BufferAttribute.new(positions, 3))
+    material = THREE.LineBasicMaterial.new(color = THREE.Color.new(rgb_color[0], rgb_color[1], rgb_color[2]))
+    lines = THREE.LineSegments.new(geometry, material)
+    return lines
+
+def viz_vox_outlines(midpts: list[list[float]], colors: list[list[float]], vox_dim: float) -> list[THREE.LineSegments]:
+    """
+    create outlines for voxels
+
+    Parameters
+    ----------
+    midpts : list[list[float]]
+        list[shape(npts, 3)], a list of the midpts of the voxels
+    
+    colors : list[list[float]]
+        list[shape(npts, 12 * 2 * 3)], a flat list defined as [r1, g1, b1, r2, g2, b2, ... , rn, gn, bn]
+
+    vox_dim : float
+        the size of the voxels.
+
+    Returns
+    -------
+    THREE.LineSegments
+        threejs line segments of the voxels
+    """
+    geometries = []
+    for cnt,midpt in enumerate(midpts):
+        cube = THREE.BoxGeometry.new(vox_dim, vox_dim, vox_dim)
+        midpt = window.Float32Array.new(midpt)
+        cube.applyMatrix4(THREE.Matrix4.new().makeTranslation(midpt[0], midpt[1], midpt[2]))
+        # edges geometry
+        edge_geom = THREE.EdgesGeometry.new(cube)
+        color = colors[cnt]
+        color = window.Float32Array.new(color)
+        edge_geom.setAttribute('color', THREE.BufferAttribute.new(color, 3))
+        outline = THREE.LineSegments.new(edge_geom, THREE.LineBasicMaterial.new(vertexColors = True))
+        geometries.append(edge_geom)
+
+    # merge, preserving the color attribute
+    merged_edges = mergeGeometries(geometries, True)
+    outline = THREE.LineSegments.new(merged_edges, THREE.LineBasicMaterial.new(vertexColors = True))
+    return outline
